@@ -1,12 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Мой сайт</title>
-</head>
-<body>
-
-<h1>Добро пожаловать</h1>
-<p>Это мой первый сайт</p>
-
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.transition = 'all 0.3s ease';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4800);
+    }
+    
+    function loginUser() {
+      hideLoginModal();
+      
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-black px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-x-3 text-sm z-[70]`;
+      toast.innerHTML = `
+        <span>Добро пожаловать в Homi Lab! Перенаправляем в личный кабинет...</span>
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.transition = 'all 0.3s ease';
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          toast.remove();
+          window.location.href = '#courses'; // Simulate dashboard
+        }, 300);
+      }, 1800);
+    }
+    
+    // Boot
+    function boot() {
+      initializeTailwind();
+      initNavbar();
+      
+      // Easter egg: Konami code hint in console
+      console.log('%c[Homi Lab] Добро пожаловать! Сайт готов.', 'color:#64748b');
+    }
+    
+    window.onload = boot;
+  </script>
 </body>
 </html>
