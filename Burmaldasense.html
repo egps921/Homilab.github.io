@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>BurmaldaSense</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#0a0a0a;font-family:'Segoe UI',Tahoma,sans-serif;height:100vh;display:flex;justify-content:center;align-items:center}
+        .login-container{background:#0f0f0f;border:1px solid #1a1a1a;border-radius:12px;padding:40px 44px;width:380px;box-shadow:0 8px 40px rgba(0,0,0,0.8)}
+        .logo{text-align:center;margin-bottom:8px}
+        .logo h1{font-size:24px;font-weight:600;color:#e8e8e8}
+        .logo h1 span{color:#4caf50}
+        .logo .sub{font-size:12px;color:#555;margin-top:2px;letter-spacing:2px}
+        .divider{border:none;border-top:1px solid #1a1a1a;margin:16px 0 20px 0}
+        .field{margin-bottom:14px}
+        .field label{display:block;font-size:11px;color:#666;text-transform:uppercase;margin-bottom:4px}
+        .field .input{width:100%;padding:10px 14px;background:#0a0a0a;border:1px solid #1e1e1e;border-radius:6px;font-size:13px;color:#d0d0d0;outline:none}
+        .field .input:focus{border-color:#2d7d46}
+        .btn-login{width:100%;padding:10px;background:#2d7d46;border:none;border-radius:6px;font-size:14px;font-weight:600;color:#fff;cursor:pointer}
+        .btn-login:hover{background:#3a8d56}
+        .error-msg{display:none;background:#1a0d0d;border:1px solid #4a2a2a;border-radius:6px;padding:8px 14px;font-size:12px;color:#e06060;margin-top:12px}
+        .error-msg.show{display:block}
+        .version{text-align:center;font-size:10px;color:#333;margin-top:16px}
+        .status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#4caf50;margin-right:4px;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .main-app{display:none;width:100%;max-width:1100px;height:100vh;flex-direction:column;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;overflow:hidden}
+        .main-app.active{display:flex}
+        .login-container.hidden{display:none}
+        .title-bar{background:#0f0f0f;padding:4px 14px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#777;height:28px}
+        .title-bar .icon{width:14px;height:14px;background:#2d7d46;border-radius:2px;display:inline-block}
+        .title-bar .close{color:#555;cursor:pointer;padding:0 8px;font-size:14px}
+        .title-bar .close:hover{color:#e06060}
+        .main{display:flex;flex:1;overflow:hidden}
+        .sidebar{width:220px;background:#0f0f0f;border-right:1px solid #1a1a1a;padding:12px 0;font-size:12px}
+        .sidebar .logo{padding:0 16px 12px 16px;font-size:18px;font-weight:600;color:#e0e0e0;border-bottom:1px solid #1a1a1a;margin-bottom:10px}
+        .sidebar .logo span{color:#4caf50}
+        .sidebar-item{padding:4px 16px;color:#888;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s}
+        .sidebar-item:hover{background:#161616;color:#d0d0d0}
+        .sidebar-divider{border:none;border-top:1px solid #1a1a1a;margin:6px 12px}
+        .sidebar-label{padding:6px 16px 2px 16px;color:#555;font-size:10px;text-transform:uppercase}
+        .content{flex:1;background:#0a0a0a;padding:14px 20px;overflow-y:auto;display:flex;flex-direction:column}
+        .content-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a;padding-bottom:10px;margin-bottom:14px}
+        .content-header h1{font-size:20px;font-weight:400;color:#e0e0e0}
+        .content-header h1 span{color:#4caf50;font-weight:600}
+        .content-header .path{font-size:11px;color:#555;font-family:Consolas,monospace}
+        .console-panel{background:#080808;border:1px solid #161616;border-radius:4px;padding:10px 14px;font-family:Consolas,monospace;font-size:11px;color:#aaa;margin-bottom:12px}
+        .console-panel .header{color:#4fc3f7;font-weight:700;font-size:12px;border-bottom:1px solid #141414;padding-bottom:4px;margin-bottom:6px}
+        .console-panel .line{padding:3px 0;cursor:pointer;border-radius:3px;padding-left:4px}
+        .console-panel .line:hover{background:#121212;color:#d0d0d0}
+        .console-panel .prompt{color:#4fc3f7}
+        .console-panel .status{color:#4caf50}
+        .console-panel .line .result{display:none;color:#4caf50;margin-left:8px;font-size:11px}
+        .console-panel .line .result.show{display:inline}
+        .console-panel .line .result.error{color:#e06060}
+        .info-panel{background:#0d0d0d;border-top:1px solid #141414;padding:8px 12px;margin-top:8px;display:flex;justify-content:space-between;font-size:11px;color:#555}
+        .info-panel .status{color:#4caf50}
+        .status-bar{background:#0d0d0d;border-top:1px solid #1a1a1a;padding:2px 16px;font-size:11px;color:#555;display:flex;justify-content:space-between;height:24px;align-items:center}
+        .status-bar .logout-btn{color:#e06060;cursor:pointer;padding:0 8px}
+        .status-bar .logout-btn:hover{color:#ff6666}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+        @media(max-width:768px){.sidebar{width:160px}.login-container{width:92%;padding:28px 20px}}
+    </style>
+</head>
+<body>
+<div class="login-container" id="loginContainer">
+<div class="logo"><h1>BURMALDA<span>SENSE</span></h1><div class="sub">▸ Z-CITY LOADER</div></div>
+<hr class="divider">
+<form onsubmit="return false;">
+<div class="field"><label>Логин</label><input class="input" id="username" type="text" value="Klxcyn"></div>
+<div class="field"><label>Пароль</label><input class="input" id="password" type="password" value="81135324Egor"></div>
+<button class="btn-login" onclick="handleLogin()">ВОЙТИ</button>
+<div class="error-msg" id="errorMsg">⚠️ Неверный логин или пароль</div>
+</form>
+<div class="version"><span class="status-dot"></span> v2.0.0 · Online</div>
+</div>
+<div class="main-app" id="mainApp">
+<div class="title-bar"><div class="left"><span class="icon"></span><span style="color:#e0e0e0;font-weight:500;">BurmaldaSense</span></div><div><span class="close" onclick="logout()">✕</span></div></div>
+<div class="main">
+<div class="sidebar">
+<div class="logo">BURMALDA<span>SENSE</span></div>
+<div class="sidebar-label">Cheat</div>
+<div class="sidebar-item"><span style="color:#4fc3f7;">g</span></div>
+<div class="sidebar-item" style="padding-left:16px;flex-direction:column;align-items:flex-start;gap:1px;"><span style="color:#d0d0d0;">Garry's Mod</span><span style="color:#666;font-size:11px;">BurmaldaSense : Z-City</span><span style="color:#555;font-size:11px;">Klxcyn / Maxwelliq / sharmlow</span></div>
+<div class="sidebar-divider"></div>
+<div class="sidebar-item" style="color:#4caf50;" onclick="executeCommand(1)">⚡ Load</div>
+<div class="sidebar-item" style="color:#e06060;" onclick="executeCommand(2)">⏻ Exit</div>
+<div class="sidebar-divider"></div>
+<div class="sidebar-item" style="color:#e06060;" onclick="logout()">⬅ Logout</div>
+</div>
+<div class="content">
+<div class="content-header"><h1>BURMALDA<span>SENSE</span></h1><span class="path">C:\BurmaldaSense\</span></div>
+<div class="console-panel" id="consolePanel">
+<div class="header">═ BurmaldaSense Loader v2.0</div>
+<div class="line" onclick="executeCommand(1)"><span class="prompt">&gt;</span> 1. Загрузить чит<span class="result" id="result1"></span></div>
+<div class="line" onclick="executeCommand(2)"><span class="prompt">&gt;</span> 2. Выгрузить чит<span class="result" id="result2"></span></div>
+<div class="line" onclick="executeCommand(3)"><span class="prompt">&gt;</span> 3. Управление конфигами<span class="result" id="result3"></span></div>
+<div class="line" onclick="executeCommand(4)"><span class="prompt">&gt;</span> 4. Информация<span class="result" id="result4"></span></div>
+<div class="line" onclick="executeCommand(5)"><span class="prompt">&gt;</span> 5. Выход<span class="result" id="result5"></span></div>
+<div class="line" style="margin-top:4px;border-top:1px solid #141414;padding-top:4px;cursor:default;"><span class="prompt">[СТАТУС: </span><span class="status" id="statusText">ЗАГРУЖЕН</span><span class="prompt">] ●</span></div>
+<div class="line" style="cursor:default;"><span class="prompt">Выберите действие: </span><span style="color:#4fc3f7;animation:blink 1s step-end infinite;">█</span></div>
+</div>
+<div class="info-panel"><div></div><div><span class="status">● Чит активен</span><span style="margin-left:12px;">Версия: 2.0</span><span id="userDisplay" style="margin-left:12px;">👤 Klxcyn</span></div></div>
+</div>
+</div>
+<div class="status-bar"><span>⚡ BurmaldaSense Loader v2.0</span><span class="logout-btn" onclick="logout()">Выйти</span></div>
+</div>
+<script>
+const users={'Klxcyn':'81135324Egor','admin':'123456','demo':'123456'};
+let isLoaded=false;
+function executeCommand(num) {
+    const resultEl = document.getElementById('result' + num);
+    const statusEl = document.getElementById('statusText');
+    document.querySelectorAll('.result').forEach(el => { el.classList.remove('show'); el.textContent=''; });
+    resultEl.textContent=' ⏳';
+    resultEl.classList.add('show');
+    setTimeout(() => {
+        switch(num) {
+            case 1:
+                if (isLoaded) { resultEl.textContent=' ✅ Уже загружен'; }
+                else { isLoaded=true; statusEl.textContent='ЗАГРУЖЕН'; resultEl.textContent=' ✅ Успешно!'; }
+                break;
+            case 2:
+                if (!isLoaded) { resultEl.textContent=' ⚠️ Чит не загружен'; resultEl.classList.add('error'); }
+                else { isLoaded=false; statusEl.textContent='НЕ ЗАГРУЖЕН'; resultEl.textContent=' ✅ Выгружен!'; }
+                break;
+            case 3: resultEl.textContent=' 📂 Открыто: configs/default.cfg'; break;
+            case 4: resultEl.textContent=' ℹ️ Версия 2.0 | Статус: ' + (isLoaded?'Активен':'Не активен'); break;
+            case 5: resultEl.textContent=' 👋 Выход...'; setTimeout(()=>logout(),800); break;
+        }
+    },500);
+}
+function handleLogin() {
+    const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value.trim();
+    const e=document.getElementById('errorMsg');
+    if (!u||!p) { e.textContent='⚠️ Заполните все поля'; e.classList.add('show'); return; }
+    if (users[u] && users[u]===p) {
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('mainApp').classList.add('active');
+        document.getElementById('userDisplay').textContent='👤 '+u;
+    } else { e.textContent='⚠️ Неверный логин или пароль'; e.classList.add('show'); }
+}
+function logout() {
+    document.getElementById('mainApp').classList.remove('active');
+    document.getElementById('loginContainer').classList.remove('hidden');
+    document.getElementById('password').value='';
+    document.getElementById('statusText').textContent='НЕ ЗАГРУЖЕН';
+    isLoaded=false;
+}
+document.addEventListener('keydown', e => { if (e.key==='Enter' && !document.getElementById('mainApp').classList.contains('active')) handleLogin(); });
+</script>
+</body>
+</html>
